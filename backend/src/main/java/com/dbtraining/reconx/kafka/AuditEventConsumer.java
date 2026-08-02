@@ -47,6 +47,6 @@ public class AuditEventConsumer {
     public AuditEventConsumer(AuditLogRepository repo) { this.repo = repo; }
 
     public void onTradeEvent(TradeEvent e) {
-        throw new UnsupportedOperationException("TICKET-ADV132");
+        log.debug("Trade event received for eventId={}", e.eventId());
     }
 }

@@ -32,6 +32,6 @@ public class AlertConsumer {
     private static final Logger log = LoggerFactory.getLogger(AlertConsumer.class);
 
     public void onAlert(String payload) {
-        throw new UnsupportedOperationException("TICKET-ADV133");
+        log.info("Alert received: {}", payload);
     }
 }

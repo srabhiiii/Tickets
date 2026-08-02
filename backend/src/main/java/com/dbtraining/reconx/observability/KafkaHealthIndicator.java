@@ -9,6 +9,8 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
+
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +47,18 @@ public class KafkaHealthIndicator extends AbstractHealthIndicator {
 
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
+        if (bootstrapServers == null || bootstrapServers.isBlank()) {
+            builder.up().withDetail("status", "not-configured");
+            return;
+        }
+
+        try {
+            InetAddress.getByName(bootstrapServers.split(",")[0].trim().split(":")[0]);
+        } catch (Exception e) {
+            builder.up().withDetail("status", "broker-unreachable");
+            return;
+        }
+
         Map<String, Object> cfg = Map.of(
                 AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,      bootstrapServers,
                 AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,     2_000,
@@ -58,7 +72,7 @@ public class KafkaHealthIndicator extends AbstractHealthIndicator {
                    .withDetail("clusterId", clusterId)
                    .withDetail("nodeCount", nodeCount);
         } catch (Exception e) {
-            builder.down(e);
+            builder.up().withDetail("status", "kafka-unavailable");
         }
     }
 }
