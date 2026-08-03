@@ -109,10 +109,10 @@ watch 'docker compose ps'
 Then open:
 
 - Backend Swagger UI — <http://localhost:8081/api/swagger-ui.html>
-- Frontend SPA — <http://localhost:3000> (or whatever port `docker-compose.yml` maps for the frontend)
+- Frontend SPA — <http://localhost:5173> (or whatever port `docker-compose.yml` maps for the frontend)
 - Kafdrop — <http://localhost:9000>
 - Prometheus — <http://localhost:9090>
-- Grafana — <http://localhost:3001> (admin/admin, then Datasources → Prometheus, then Dashboards → ReconX)
+- Grafana — <http://localhost:3000> (admin/admin, then Datasources → Prometheus, then Dashboards → ReconX)
 
 Tear down: `docker compose down -v` (the `-v` also drops volumes).
 

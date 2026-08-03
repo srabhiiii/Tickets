@@ -9,6 +9,9 @@ FROM eclipse-temurin:25-jdk AS build
 WORKDIR /workspace
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
+RUN chmod +x mvnw && sed -i 's/\r$//' mvnw
+COPY recon-audit-starter recon-audit-starter
+RUN ./mvnw -f recon-audit-starter/pom.xml clean install -DskipTests
 RUN ./mvnw -q -B dependency:go-offline || true
 COPY src src
 RUN ./mvnw -q -B -DskipTests package && \
@@ -19,6 +22,6 @@ RUN addgroup -S reconx && adduser -S reconx -G reconx
 USER reconx
 WORKDIR /app
 COPY --from=build /workspace/app.jar app.jar
-EXPOSE 8080
+EXPOSE 8081
 ENV JAVA_OPTS=""
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
