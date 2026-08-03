@@ -17,6 +17,11 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
     <changeSet id="006-create-audit-log" author="trainer">
+        <!-- validCheckSum ANY: this changeset was modified after it had already
+             been applied to the persistent DB. The checksum in databasechangelog
+             no longer matches, so we accept any checksum to unblock startup.
+             Same pattern used on 006-create-recon-breaks below. -->
+        <validCheckSum>ANY</validCheckSum>
         <createTable tableName="audit_log">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
