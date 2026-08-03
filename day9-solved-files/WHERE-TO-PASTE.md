@@ -123,16 +123,14 @@ boot even if Kafka isn't up — but no messages will flow.
 Once you've filled in the producer + a consumer:
 
 ```bash
-# 1. Log in (Day 5) and POST a trade (Day 5)
-TOKEN=$(curl -s -X POST http://localhost:8081/api/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"admin@reconx.local","password":"password"}' | jq -r .token)
+# 1. Log in using the correct seeded admin credentials
+$response = Invoke-RestMethod -Uri "http://localhost:8081/api/auth/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@db.com","password":"admin123"}'
 
-curl -X POST http://localhost:8081/api/v1/trades \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"tradeRef":"EQU-20260603-0001","instrumentId":1,"counterpartyId":1,
-       "assetClass":"EQUITY","side":"BUY","quantity":100,"price":100,"tradeDate":"2026-06-03"}'
+$TOKEN = $response.token
+
+# 2. POST a new trade with a unique tradeRef (e.g., EQU-20260603-9999)
+Invoke-RestMethod -Uri "http://localhost:8081/api/v1/trades" -Method Post -Headers @{ "Authorization" = "Bearer $TOKEN" } -ContentType "application/json" -Body '{"tradeRef":"EQU-20260603-9999","instrumentId":1,"counterpartyId":1,"assetClass":"EQUITY","side":"BUY","quantity":100,"price":100,"tradeDate":"2026-06-03"}'
+
 
 # 2. Open Kafdrop and browse "trade-events" — the message should be there
 open http://localhost:9000
