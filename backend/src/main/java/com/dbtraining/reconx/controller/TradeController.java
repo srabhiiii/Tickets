@@ -14,14 +14,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * ============================================================================
@@ -44,6 +48,27 @@ public class TradeController {
     public TradeController(TradeService service, TradeMapper mapper) {
         this.service = service;
         this.mapper = mapper;
+    }
+
+    private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "Stream of live trade events via SSE")
+    public SseEmitter stream() {
+        SseEmitter emitter = new SseEmitter(0L); // Infinite timeout
+        emitters.add(emitter);
+
+        emitter.onCompletion(() -> emitters.remove(emitter));
+        emitter.onTimeout(() -> emitters.remove(emitter));
+        emitter.onError((ex) -> emitters.remove(emitter));
+
+        try {
+            emitter.send(SseEmitter.event().name("ping").data("connected"));
+        } catch (IOException e) {
+            emitters.remove(emitter);
+        }
+
+        return emitter;
     }
 
     @GetMapping
